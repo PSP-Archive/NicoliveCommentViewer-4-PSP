@@ -36,7 +36,7 @@ ASFLAGS = $(CFLAGS)
 LIBDIR =
 LDFLAGS =
 
-LIBS = -lpspgu -lm -lpsputility -lpsprtc -lpspctrl -lstdc++
+LIBS += -lpspgu -lm -lpsprtc -lstdc++
 LIBS += -lssl -lcrypto
 
 PSP_FW_VERSION = 371

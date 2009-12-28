@@ -37,8 +37,12 @@
 
 
 
-PSP_MODULE_INFO("CommentViewerTest", PSP_MODULE_USER, 1, 1);
-PSP_MAIN_THREAD_ATTR(THREAD_ATTR_USER);
+//PSP_MODULE_INFO("NCPS", PSP_MODULE_USER, 1, 1);
+//PSP_MAIN_THREAD_ATTR(THREAD_ATTR_USER);
+
+PSP_MODULE_INFO("NCPS", 0x1000, 1, 1);
+PSP_MAIN_THREAD_ATTR(0);
+
 PSP_HEAP_SIZE_KB(-1);
 
 
@@ -71,6 +75,7 @@ int ExitCallback(int arg1, int arg2, void *common)
 	
 	intraFontShutdown();
 
+	pspSdkInetTerm();
 	sceGuTerm();
 	sceKernelExitGame();
 	return 0;
@@ -106,11 +111,17 @@ int SetupCallback(void)
 
 int main(int argc, char *argv[])
 {
-	pspDebugScreenInit();
-	pspDebugScreenPrintf("Loading intraFont...\n");
-
 	SetupCallback();		//終了時のコールバックをセット
+	pspDebugScreenInit();
 
+	// 必要なモジュールをロード
+	if(pspSdkLoadInetModules() < 0)
+	{
+		pspDebugScreenPrintf("failed to load network modules\n");
+		sceKernelSleepThread();
+	}
+
+	pspDebugScreenPrintf("Loading intraFont...\n");
 	intraFontInit();
 	char file[40];
 	for(int i=0; i<16; i++)
@@ -180,7 +191,7 @@ int main(int argc, char *argv[])
 	GUT_stat->colors.normal.border = BLUE;
 
 
-	int DrawThreadId = sceKernelCreateThread("DrawThread", DrawThread, 0x22, 0x10000, PSP_THREAD_ATTR_USER, NULL);
+	int DrawThreadId = sceKernelCreateThread("DrawThread", DrawThread, 0x16, 0x10000, PSP_THREAD_ATTR_USER, NULL);
 	if(DrawThreadId < 0)
 	{
 		pspDebugScreenPrintf("error: failed to create draw thread\n");
@@ -188,7 +199,7 @@ int main(int argc, char *argv[])
 	}
 	sceKernelStartThread(DrawThreadId, 0, NULL);
 
-	int NetThreadId = sceKernelCreateThread("NetThread", NetThread, 0x20, 0x10000, PSP_THREAD_ATTR_USER, NULL);
+	int NetThreadId = sceKernelCreateThread("NetThread", NetThread, 0x18, 0x10000, PSP_THREAD_ATTR_USER, NULL);
 	if(NetThreadId < 0)
 	{
 		GUT_stat->setValue("通信スレッドの生成に失敗しました");
@@ -198,14 +209,16 @@ int main(int argc, char *argv[])
 	GUT_stat->setValue("通信スレッドの生成に成功");
 
 
+
+	memset(&currpad, 0, sizeof(SceCtrlData));
 	sceCtrlSetSamplingCycle(0);
 	sceCtrlSetSamplingMode(PSP_CTRL_MODE_ANALOG);
 	while(1)
 	{
 		sceCtrlReadBufferPositive(&currpad, 1);
-		oldpad = currpad;
-
-		sceKernelDelayThread(50 * 1000);
+		
+		// これが原因
+		// oldpad = currpad;
 	}
 	sceKernelSleepThreadCB();
 	return 0;

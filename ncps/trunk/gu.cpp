@@ -91,6 +91,10 @@ int DrawThread(SceSize args, void *argp)
 
 	char *mail_init = NULL, *pass_init = NULL;
 	char *mail = NULL, *pass = NULL;
+
+
+	SceCtrlData oldpad;
+	memset(&oldpad, 0, sizeof(SceCtrlData));
 	while(1)
 	{	
 		GUSTART;
@@ -99,10 +103,14 @@ int DrawThread(SceSize args, void *argp)
 		GUCLEAR;
 		intraFontSetStyle(jpn0, 0.8f, BLACK, 0, NULL);
 
+		if(currpad.Buttons & PSP_CTRL_SQUARE)
+		{
+			intraFontPrint(jpn0, 30, 30, " ‰Ÿ‚³‚ê‚Ä‚é‚æI");
+		}
+
 		if(!(oldpad.Buttons & PSP_CTRL_SQUARE)
 			&& (currpad.Buttons & PSP_CTRL_SQUARE))
 		{
-			GUT_stat->setValue("¡");
 			FREE(mail);
 			FREE(pass);
 			LoginDialog("unko_king@live.jp", "unkoking", mail, pass);
@@ -119,9 +127,17 @@ int DrawThread(SceSize args, void *argp)
 
 		lview->Render(&currpad, NULL);
 		lview->Draw(0, 0);
-		intraFontPrint(jpn0, 0, 480-13-13, userData.mail);
-		intraFontPrint(jpn0, 240, 480-13-13, userData.pass);
-		intraFontPrint(jpn0, 0, 480-13-13, userData.user_session);
+
+	//	intraFontPrintf(jpn0, 0, 30, "&currpad: %p", &currpad);
+	//	intraFontPrintf(jpn0, 0, 50, "&oldpad: %p", &oldpad);
+	//	intraFontPrintf(jpn0, 0, 70, "currpad.Buttons: %08X", currpad.Buttons);
+	//	intraFontPrintf(jpn0, 0, 90, "oldpad.Buttons: %08X", oldpad.Buttons);
+
+
+
+		//intraFontPrint(jpn0, 0, 480-13-13, userData.mail);
+		//intraFontPrint(jpn0, 240, 480-13-13, userData.pass);
+		//intraFontPrint(jpn0, 0, 480-13-13, userData.user_session);
 		//menubar->Draw();
 
 		GUT_stat->Draw(0, 272-GUTextBox::GUTEXTBOX_HEIGHT, 480);
@@ -130,6 +146,7 @@ int DrawThread(SceSize args, void *argp)
 		GUSYNC;
 		GUFLIP;
 
+		oldpad = currpad;
 		sceKernelDelayThread(50 * 1000);
 	}
 

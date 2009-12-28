@@ -1,7 +1,6 @@
 #include <pspkernel.h>
 #include <pspctrl.h>
 #include <psputility.h>
-
 #include <pspgu.h>
 #include <pspdisplay.h>
 
@@ -10,13 +9,11 @@
 #include <string.h>
 
 #include "types.h"
-
-#include "Libs/intraFont/intraFont.h"
-
 #include "dialogs.h"
 #include "gu.h"
 #include "net.h"
 
+#include "Libs/intraFont/intraFont.h"
 #include "Libs/GUDraw.h"
 #include "Libs/GUListView.h"
 
@@ -67,6 +64,8 @@ void LoginDialog(char *mail_init, char *pass_init, char *mail, char *pass)
 
 	unsigned int cursor = 0;
 
+	SceCtrlData oldpad;
+	memset(&oldpad, 0, sizeof(SceCtrlData));
 	while(1)
 	{	
 		if(!(oldpad.Buttons & PSP_CTRL_UP)
@@ -108,7 +107,7 @@ void LoginDialog(char *mail_init, char *pass_init, char *mail, char *pass)
 				break;
 		}
 
-		if(GUT_mail->Render(&currpad) == GUTextBox::GUTEXTBOX_RESULT_CHANGED)
+/*		if(GUT_mail->Render(&currpad) == GUTextBox::GUTEXTBOX_RESULT_CHANGED)
 		{
 			continue;
 		}
@@ -116,7 +115,7 @@ void LoginDialog(char *mail_init, char *pass_init, char *mail, char *pass)
 		{
 			continue;
 		}
-		GUB_login->Render(&currpad);
+*/		GUB_login->Render(&currpad);
 
 		if(GUB_login->getState() == GUButton::GUBUTTON_STATE_PUSHED)
 		{
@@ -134,6 +133,9 @@ void LoginDialog(char *mail_init, char *pass_init, char *mail, char *pass)
 		GUFINISH
 		GUSYNC
 		GUFLIP
+
+		oldpad = currpad;
+		sceKernelDelayThread(50 * 1000);
 	}
 
 	mail = (char *)malloc(strlen(GUT_mail->getValue())+1);
