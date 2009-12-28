@@ -38,6 +38,5 @@ extern unsigned int __attribute__((aligned(16))) list[262144];
 extern bool g_controllable;
 
 extern SceCtrlData currpad;
-extern SceCtrlData oldpad;
 
 #endif
