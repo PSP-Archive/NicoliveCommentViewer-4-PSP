@@ -30,9 +30,6 @@
 
 
 unsigned int __attribute__((aligned(16))) list[262144];
-
-GUData guData;
-
 int DrawThread(SceSize args, void *argp)
 {
 	FILE *fp;
@@ -70,31 +67,6 @@ int DrawThread(SceSize args, void *argp)
 
 	guData.inited = true;
 
-
-	char temp[128];
-	// 試験的にデータを追加してみるー
-	for(int q=1; q<8; q++)
-	{
-		// コメ番
-		sprintf(temp, "%d", q);
-		lview->getColumn(0)->addItem(temp);
-		
-		// コメント内容
-		sprintf(temp, "(＃＾ω＾)ﾋﾟｷﾋﾟｷ");
-		lview->getColumn(1)->addItem(temp);
-
-		// ID/コテハン
-		sprintf(temp, "%p", (void *)(lview->getColumn(2)->itemlist_current));
-		lview->getColumn(2)->addItem(temp);	
-	}
-	lview->Render(NULL, NULL);
-
-	char *mail_init = NULL, *pass_init = NULL;
-	char *mail = NULL, *pass = NULL;
-
-
-	SceCtrlData oldpad;
-	memset(&oldpad, 0, sizeof(SceCtrlData));
 	while(1)
 	{	
 		GUSTART;
@@ -103,32 +75,9 @@ int DrawThread(SceSize args, void *argp)
 		GUCLEAR;
 		intraFontSetStyle(jpn0, 0.8f, BLACK, 0, NULL);
 
-		if(currpad.Buttons & PSP_CTRL_SQUARE)
-		{
-			intraFontPrint(jpn0, 30, 30, "□押されてるよ！");
-		}
-
-		if(!(oldpad.Buttons & PSP_CTRL_SQUARE)
-			&& (currpad.Buttons & PSP_CTRL_SQUARE))
-		{
-			FREE(mail);
-			FREE(pass);
-			LoginDialog("unko_king@live.jp", "unkoking", mail, pass);
-			if(mail != NULL && pass != NULL)
-			{
-				FREE(userData.mail);
-				FREE(userData.pass);
-				userData.mail = (char *)malloc(strlen(mail)+1);
-				userData.pass = (char *)malloc(strlen(pass)+1);
-				strcpy(userData.mail, mail);
-				strcpy(userData.pass, pass);
-			}
-		}
-
-		lview->Render(&currpad, NULL);
 		lview->Draw(0, 0);
+		GUT_stat->Draw(0, 272-GUTextBox::GUTEXTBOX_HEIGHT, 480);
 
-	//	intraFontPrintf(jpn0, 0, 30, "&currpad: %p", &currpad);
 	//	intraFontPrintf(jpn0, 0, 50, "&oldpad: %p", &oldpad);
 	//	intraFontPrintf(jpn0, 0, 70, "currpad.Buttons: %08X", currpad.Buttons);
 	//	intraFontPrintf(jpn0, 0, 90, "oldpad.Buttons: %08X", oldpad.Buttons);
@@ -140,13 +89,11 @@ int DrawThread(SceSize args, void *argp)
 		//intraFontPrint(jpn0, 0, 480-13-13, userData.user_session);
 		//menubar->Draw();
 
-		GUT_stat->Draw(0, 272-GUTextBox::GUTEXTBOX_HEIGHT, 480);
 
 		GUFINISH;
 		GUSYNC;
 		GUFLIP;
 
-		oldpad = currpad;
 		sceKernelDelayThread(50 * 1000);
 	}
 

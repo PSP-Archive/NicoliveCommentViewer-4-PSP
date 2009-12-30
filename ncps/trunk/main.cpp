@@ -34,6 +34,7 @@
 
 #include "gu.h"
 #include "net.h"
+#include "render.h"
 
 
 
@@ -58,8 +59,19 @@ bool g_controllable = true;
 GUListView *lview;
 GUTextBox *GUT_stat;
 
+int DrawThreadId = -1;
+int RenderThreadId = -1;
+int NetThreadId = -1;
+int RecvThreadId = -1;
+
+GUData guData;
+ConData conData;
+LiveData liveData;
+UserData userData;
+ThreadData thData;
+
 SceCtrlData currpad;
-SceCtrlData oldpad;
+
 
 int ExitCallback(int arg1, int arg2, void *common)
 {
@@ -191,7 +203,7 @@ int main(int argc, char *argv[])
 	GUT_stat->colors.normal.border = BLUE;
 
 
-	int DrawThreadId = sceKernelCreateThread("DrawThread", DrawThread, 0x16, 0x10000, PSP_THREAD_ATTR_USER, NULL);
+	DrawThreadId = sceKernelCreateThread("DrawThread", DrawThread, 0x22, 0x10000, PSP_THREAD_ATTR_USER, NULL);
 	if(DrawThreadId < 0)
 	{
 		pspDebugScreenPrintf("error: failed to create draw thread\n");
@@ -199,7 +211,16 @@ int main(int argc, char *argv[])
 	}
 	sceKernelStartThread(DrawThreadId, 0, NULL);
 
-	int NetThreadId = sceKernelCreateThread("NetThread", NetThread, 0x18, 0x10000, PSP_THREAD_ATTR_USER, NULL);
+	RenderThreadId = sceKernelCreateThread("RenderThread", RenderThread, 0x18, 0x10000, PSP_THREAD_ATTR_USER, NULL);
+	if(RenderThreadId < 0)
+	{
+		GUT_stat->setValue("レンダースレッドの生成に失敗しました");
+		sceKernelSleepThreadCB();
+	}
+	sceKernelStartThread(RenderThreadId, 0, NULL);
+	GUT_stat->setValue("レンダースレッドの生成に成功");
+
+	NetThreadId = sceKernelCreateThread("NetThread", NetThread, 0x20, 0x10000, PSP_THREAD_ATTR_USER, NULL);
 	if(NetThreadId < 0)
 	{
 		GUT_stat->setValue("通信スレッドの生成に失敗しました");
@@ -209,16 +230,12 @@ int main(int argc, char *argv[])
 	GUT_stat->setValue("通信スレッドの生成に成功");
 
 
-
 	memset(&currpad, 0, sizeof(SceCtrlData));
 	sceCtrlSetSamplingCycle(0);
 	sceCtrlSetSamplingMode(PSP_CTRL_MODE_ANALOG);
 	while(1)
 	{
 		sceCtrlReadBufferPositive(&currpad, 1);
-		
-		// これが原因
-		// oldpad = currpad;
 	}
 	sceKernelSleepThreadCB();
 	return 0;

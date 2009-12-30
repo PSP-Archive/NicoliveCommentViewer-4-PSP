@@ -23,7 +23,7 @@ OBJS += Libs/GUDiag/GUDiag_osk.o
 OBJS += Libs/GUMenu/GUMenu.o 
 OBJS += Libs/GUDraw/GUDraw.o
 
-OBJS += dialogs.o gu.o
+OBJS += gu.o render.o 
 OBJS += net.o
 OBJS += main.o
 
