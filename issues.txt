@@ -1,0 +1,16 @@
+・LoginDialog内、userData.mail/passがオーバーフローする可能性がある
+→GUTextBox::RenderのGetOSKTextで、バッファ文字数の指定ができるようにする
+
+・GetOSKTextを呼んでいる全箇所の前後に、DrawThreadをサスペンド・レジュームさせるコードを挿入
+
+・CheckConnectionの間隔をもっとあける
+・NetThread内で、Heartbeat APIを叩くようにする。
+	・来場者数/コメント数の表示。
+	・番組が終了していたら、live_connectedにfalseを代入（衝突注意！）
+
+・ConnectToAccessPoint/GetUserSessionのタイムアウトを設定(15秒くらい)
+・GetUserSessionの中止をできるようにする
+・中止確認のダイアログ表示
+→GUDiag(TYPE_YESNO)の実装
+
+・番組に接続後、RecvThread/NetThreadがフリーズ（特定して、対策するべし

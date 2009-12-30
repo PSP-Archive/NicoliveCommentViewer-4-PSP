@@ -122,25 +122,18 @@ void LoginDialog(char *mail_init, char *pass_init, char *mail, char *pass)
 			break;
 		}
 
-		GUSTART
-		DrawSquare(0, 0, 480, 272, RGBA(128, 128, 128, 160), true);
+		GUSTART;
+		sceGuClearColor(WHITE);
 		GUT_mail->Draw(100, 50, 280);
 		GUT_pass->Draw(100, 150, 280);
 		GUB_login->Draw((480-GUB_login->getWidth())/2, 200);
-
-		intraFontPrintf(jpn0, 20, 20, "GUT_mail:%s", GUT_mail->getValue());
-		intraFontPrintf(jpn0, 20, 40, "GUT_pass:%s", GUT_pass->getValue());
-		GUFINISH
-		GUSYNC
-		GUFLIP
+		GUFINISH;
+		GUSYNC;
+		GUFLIP;
 
 		oldpad = currpad;
 		sceKernelDelayThread(50 * 1000);
 	}
-
-	mail = (char *)malloc(strlen(GUT_mail->getValue())+1);
-	pass = (char *)malloc(strlen(GUT_pass->getValue())+1);
-
 	strcpy(mail, GUT_mail->getValue());
 	strcpy(pass, GUT_pass->getValue());
 	

@@ -1,14 +1,7 @@
-
-typedef struct _ConData
-{
-	bool net_connected;
-	bool live_connected;
-	bool gotcookie;
-}ConData;
-
-
 int NetThread(SceSize args, void *argp);
+int RecvThread(SceSize args, void *argp);
 
+int CheckConnection(void);
 int ConnectToAccessPoint(int configid);
 
 

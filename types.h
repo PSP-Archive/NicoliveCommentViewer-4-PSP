@@ -1,5 +1,8 @@
 #ifndef _TYPESDECL
 #define _TYPESDECL
+
+#include <vector>
+#include <string>
 #include <pspkernel.h>
 #include <pspctrl.h>
 
@@ -34,9 +37,56 @@ extern GUMenu *menubar;
 extern GUListView *lview;
 extern GUTextBox *GUT_stat;
 
+typedef struct _ThreadData
+{
+	bool try_netconnect;
+	bool try_login;
+	bool try_liveconnect;
+}ThreadData;
+
+typedef struct _UserData
+{
+	char *mail;
+	char *pass;
+
+	char *user_session;
+}UserData;
+
+typedef struct _ConData
+{
+	bool net_connected;
+	bool live_connected;
+	bool gotcookie;
+}ConData;
+
+typedef struct _LiveData
+{
+	int		id;
+	int		watch_count;
+	int		comment_count;
+	
+	int		start_time;
+	char	room_label[16]; 
+	int		room_seetno;
+
+	char	addr[64];
+	int		port;
+	int		thread;
+}LiveData;
+
+extern int DrawThreadId;
+extern int RenderThreadId;
+extern int NetThreadId;
+extern int RecvThreadId;
+
+extern UserData userData;
+extern LiveData liveData;
+extern ConData conData;
+extern ThreadData thData;
+extern std::vector<std::string> commentData;
+
 extern unsigned int __attribute__((aligned(16))) list[262144];
 extern bool g_controllable;
 
 extern SceCtrlData currpad;
-
 #endif
