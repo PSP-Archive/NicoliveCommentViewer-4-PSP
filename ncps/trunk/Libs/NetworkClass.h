@@ -24,8 +24,8 @@ private:
 	int tmpport;
 	char *tmphost;
 	char *tmpobject;
-
-
+	unsigned int intc;
+	
 public:
 	bool setHost(const char *hostname);
 	bool setPort(int port);

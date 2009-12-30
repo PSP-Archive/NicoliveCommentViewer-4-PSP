@@ -6,6 +6,7 @@
 
 struct intraFont;
 extern intraFont *jpn0;
+typedef int (*GUMenuOnclick)(int argc, void *argp);
 
 typedef struct _GUMenuColors
 {
@@ -49,73 +50,33 @@ class GUMenu;
 
 class GUMenuObject
 {
-protected:
+public:
 	char *_value;
 	bool _valid;
 	bool _enabled;
-
-public:
 	static const int MAX_COLUMN = 5;
 	static const int MAX_ITEM = 5;
 
-	char *setValue(const char *newvalue)
-	{
-		if(newvalue == NULL)
-		{
-			return NULL;
-		}
-		FREE(this->_value);
-		this->_value = (char *)malloc(strlen(newvalue) + 1);
-		strcpy(this->_value, newvalue);
-		return this->_value;
-	}
-
-	char *getValue(void)
-	{
-		return this->_value;
-	}
-
-	void setValid(void)
-	{
-		this->_valid = true;
-	}
-
-	void setInvalid(void)
-	{
-		this->_valid = false;
-	}
-
-	void setEnabled(void)
-	{
-		this->_enabled = true;
-	}
-
-	void setDisabled(void)
-	{
-		this->_enabled = false;
-	}
-
-	bool isValid(void)
-	{
-		return this->_valid;
-	}
-
-	bool isEnabled(void)
-	{
-		return this->_enabled;
-	}
+	char *setValue(const char *newvalue);
+	char *getValue(void);
+	void setValid(void);
+	void setInvalid(void);
+	void setEnabled(void);
+	void setDisabled(void);
+	bool isValid(void);
+	bool isEnabled(void);
 
 };
 
 class GUMenuItem : public GUMenuObject
 {
 private:
-	int (*onclick) (void *args, int argc);
+	GUMenuOnclick onclick;
 
 public:
 	GUMenuColumn *parent;
 	bool isSelected(void);
-	void setOnclick(int (*func_onclick) (void *args, int argc));
+	void setOnclick(GUMenuOnclick onclick);
 
 	GUMenuItem();
 	~GUMenuItem();
@@ -138,7 +99,7 @@ public:
 
 	void			setSelectedItemId(int itemid);
 	int				getSelectedItemId(void);
-	bool			setItem(int itemid, const char *value, int (*onclick)(void *args, int argc));
+	bool			setItem(int itemid, const char *value, GUMenuOnclick onclick);
 	GUMenuItem		*getItem(int itemid);
 
 	bool	isSelected(void);
@@ -177,8 +138,10 @@ private:
 	float x1, y1, x2, y2; // 選択項目の枠とかに使う座標
 
 	float width, max_width; // サブメニューの大きさ測定に使う
-
 	int validitemcount;
+
+	SceCtrlData currpad;
+	SceCtrlData oldpad;
 
 	GUMenuColors colors;
 	GUMenuColumn *columnlist;
@@ -201,7 +164,7 @@ public:
 	bool			setColumn(int columnid, const char *value);
 	GUMenuColumn	*getColumn(int columnid);
 
-	void Render(unsigned int PSP_CTRL);
+	int Render(SceCtrlData *padData);
 	void Draw(void);
 
 

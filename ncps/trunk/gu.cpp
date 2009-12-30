@@ -76,6 +76,7 @@ int DrawThread(SceSize args, void *argp)
 		intraFontSetStyle(jpn0, 0.8f, BLACK, 0, NULL);
 
 		lview->Draw(0, 0);
+		menubar->Draw();
 		GUT_stat->Draw(0, 272-GUTextBox::GUTEXTBOX_HEIGHT, 480);
 
 	//	intraFontPrintf(jpn0, 0, 50, "&oldpad: %p", &oldpad);

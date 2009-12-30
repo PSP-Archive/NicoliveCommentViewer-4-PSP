@@ -38,17 +38,63 @@ const float	GUMenu::GUMENU_ITEM_HEIGHT = GUMENU_ITEM_FONT_HEIGHT + GUMENU_SPACE_
 
 
 // onclickのためのダミー関数
-int Foo(void *args, int argc)
+int Foo(int argc, void *argp)
 {
 	return 0;
 }
  
+//GUMenuObject********************************************************
+char *GUMenuObject::setValue(const char *newvalue)
+{
+	if(newvalue == NULL)
+	{
+		return NULL;
+	}
+	FREE(this->_value);
+	this->_value = (char *)malloc(strlen(newvalue) + 1);
+	strcpy(this->_value, newvalue);
+	return this->_value;
+}
 
+char *GUMenuObject::getValue(void)
+{
+	return this->_value;
+}
+
+void GUMenuObject::setValid(void)
+{
+	this->_valid = true;
+}
+
+void GUMenuObject::setInvalid(void)
+{
+	this->_valid = false;
+}
+
+void GUMenuObject::setEnabled(void)
+{
+	this->_enabled = true;
+}
+
+void GUMenuObject::setDisabled(void)
+{
+	this->_enabled = false;
+}
+
+bool GUMenuObject::isValid(void)
+{
+	return this->_valid;
+}
+
+bool GUMenuObject::isEnabled(void)
+{
+	return this->_enabled;
+}
 
 //GUMenuItem********************************************************
-
 GUMenuItem::GUMenuItem()
 {
+	this->_value = NULL;
 }
 
 GUMenuItem::~GUMenuItem()
@@ -68,15 +114,16 @@ bool GUMenuItem::isSelected(void)
 	return false;
 }
 
-void GUMenuItem::setOnclick(int (*func_onclick) (void *args, int argc))
+void GUMenuItem::setOnclick(GUMenuOnclick onclick)
 {
-	onclick = func_onclick;
+	this->onclick = onclick;
 }
 //********************************************************
 
 //GUMenuColumn********************************************************
 GUMenuColumn::GUMenuColumn()
 {
+	this->_value = NULL;
 	item_selectionid = 0;
 
 	itemlist = new GUMenuItem[MAX_ITEM];
@@ -258,7 +305,7 @@ int GUMenuColumn::getSelectedItemId(void)
 	return item_selectionid;
 }
 
-bool GUMenuColumn::setItem(int itemid, const char *value, int (*onclick)(void *args, int argc))
+bool GUMenuColumn::setItem(int itemid, const char *value, GUMenuOnclick onclick)
 {
 	//rewrites the old item.
 
@@ -284,7 +331,9 @@ GUMenu::GUMenu()
 	columncount = 0;
 	col_selectionid = 0;
 
-	this->setState(GUMENU_STATE_HIDE);
+	this->_state = GUMENU_STATE_HIDE;
+	memset(&currpad, 0, sizeof(SceCtrlData));
+	memset(&oldpad, 0, sizeof(SceCtrlData));
 
 	columnlist = new GUMenuColumn[MAX_COLUMN];
 	for(int i=0; i<MAX_COLUMN; i++)
@@ -293,14 +342,12 @@ GUMenu::GUMenu()
 
 		this->getColumn(i)->setInvalid(); 
 		this->getColumn(i)->setDisabled();
-		this->getColumn(i)->setValue("");
 
 		for(int p=0; p<MAX_ITEM; p++)
 		{
 			this->getColumn(i)->getItem(p)->setInvalid();
 			this->getColumn(i)->getItem(p)->setDisabled();
 			this->getColumn(i)->getItem(p)->setOnclick(Foo);
-			this->getColumn(i)->getItem(p)->setValue("");
 		}
 	}
 
@@ -498,15 +545,16 @@ GUMenuColumn *GUMenu::getColumn(int columnid)
 	return &columnlist[columnid];
 }
 
-void GUMenu::Render(unsigned int PSP_CTRL)
+int GUMenu::Render(SceCtrlData *padData)
 {
-	// 基本的にキー入力は
-	// 「オルタネート」式で。
+	int ret = 0;
 	
 	// 現在選択されているメニュー項目
 	GUMenuColumn *selColumn = this->getColumn(this->getSelectedColumnId());;
 
-	if(PSP_CTRL & PSP_CTRL_TRIANGLE)
+	currpad = *padData;
+	if(!(oldpad.Buttons & PSP_CTRL_TRIANGLE)
+		&& (currpad.Buttons & PSP_CTRL_TRIANGLE))
 	{
 		//メニューバーの表示/非表示
 		if(this->getState() == GUMENU_STATE_HIDE)
@@ -519,7 +567,8 @@ void GUMenu::Render(unsigned int PSP_CTRL)
 			this->setState(GUMENU_STATE_HIDE); // 非表示
 		}
 	}
-	else if(PSP_CTRL & PSP_CTRL_CROSS)
+	else if(!(oldpad.Buttons & PSP_CTRL_CROSS)
+		&& (currpad.Buttons & PSP_CTRL_CROSS))
 	{
 		if(this->getState() == GUMENU_STATE_SHOW)
 		{
@@ -534,7 +583,8 @@ void GUMenu::Render(unsigned int PSP_CTRL)
 			// other this->getState()
 		}
 	}
-	else if(PSP_CTRL & PSP_CTRL_CIRCLE)
+	else if(!(oldpad.Buttons & PSP_CTRL_CIRCLE)
+		&& (currpad.Buttons & PSP_CTRL_CIRCLE))
 	{
 		if(this->getState() == GUMENU_STATE_SHOW)
 		{
@@ -547,12 +597,14 @@ void GUMenu::Render(unsigned int PSP_CTRL)
 		else if(this->getState() == GUMENU_STATE_OPENSUBMENU)
 		{
 			// アイテムが押された
-			//(*onclick)(args, 1);
+			ret = this->getSelectedColumnId() * 10
+				+ selColumn->getSelectedItemId();
 
 			this->setState(GUMENU_STATE_SHOW);
 		}
 	}
-	else if(PSP_CTRL & PSP_CTRL_LEFT)
+	else if(!(oldpad.Buttons & PSP_CTRL_LEFT)
+		&& (currpad.Buttons & PSP_CTRL_LEFT))
 	{
 		if(this->getState() == GUMENU_STATE_SHOW)
 		{
@@ -591,7 +643,8 @@ void GUMenu::Render(unsigned int PSP_CTRL)
 			// other state
 		}
 	}
-	else if(PSP_CTRL & PSP_CTRL_RIGHT)
+	else if(!(oldpad.Buttons & PSP_CTRL_RIGHT)
+		&& (currpad.Buttons & PSP_CTRL_RIGHT))
 	{
 		if(this->getState() == GUMENU_STATE_SHOW)
 		{
@@ -630,7 +683,8 @@ void GUMenu::Render(unsigned int PSP_CTRL)
 			// other state
 		}
 	}
-	else if(PSP_CTRL & PSP_CTRL_UP)
+	else if(!(oldpad.Buttons & PSP_CTRL_UP)
+		&& (currpad.Buttons & PSP_CTRL_UP))
 	{
 		if(this->getState() == GUMENU_STATE_OPENSUBMENU)
 		{
@@ -646,7 +700,8 @@ void GUMenu::Render(unsigned int PSP_CTRL)
 			}
 		}
 	}
-	else if(PSP_CTRL & PSP_CTRL_DOWN)
+	else if(!(oldpad.Buttons & PSP_CTRL_DOWN)
+		&& (currpad.Buttons & PSP_CTRL_DOWN))
 	{
 		if(this->getState() == GUMENU_STATE_OPENSUBMENU)
 		{
@@ -667,6 +722,9 @@ void GUMenu::Render(unsigned int PSP_CTRL)
 	{
 		// other key
 	}
+
+	oldpad = currpad;
+	return ret;
 }
 
 void GUMenu::Draw()
@@ -679,7 +737,7 @@ void GUMenu::Draw()
 	switch(this->getState())
 	{
 	case GUMENU_STATE_HIDE: // 非表示時
-		//intraFontSetStyle(jpn0, 0.8f, BLACK, 0, NULL);
+		intraFontSetStyle(jpn0, 0.8f, BLACK, 0, NULL);
 		break;
 
 	case GUMENU_STATE_SHOW: // 通常時
@@ -754,7 +812,7 @@ void GUMenu::Draw()
 
 
 		// サブメニュー
-		intraFontSetStyle(jpn0, 0.8f, colors.submenu.text, 0, NULL);
+		intraFontSetStyle(jpn0, 0.8f, BLACK, 0, NULL);
 
 		// サブメニューの右下の座標を取得するために、
 		// 最長のメニュー項目の右下座標+スペーサーを取得

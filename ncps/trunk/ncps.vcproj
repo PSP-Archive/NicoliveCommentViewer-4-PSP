@@ -80,6 +80,10 @@
 				RelativePath=".\net.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\render.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Libs"
@@ -184,6 +188,86 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="cpcnv"
+				>
+				<File
+					RelativePath=".\Libs\cpcnv.h"
+					>
+				</File>
+				<Filter
+					Name="cpcnv"
+					>
+					<File
+						RelativePath=".\Libs\cpcnv\cpcnv.c"
+						>
+					</File>
+					<File
+						RelativePath=".\Libs\cpcnv\liblzr.c"
+						>
+					</File>
+					<File
+						RelativePath=".\Libs\cpcnv\liblzr.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="gbk"
+					>
+				</Filter>
+				<Filter
+					Name="big5"
+					>
+				</Filter>
+				<Filter
+					Name="kor"
+					>
+				</Filter>
+				<Filter
+					Name="sjis"
+					>
+					<File
+						RelativePath=".\Libs\cpcnv\sjis\multibytecharcheck.c"
+						>
+					</File>
+					<File
+						RelativePath=".\Libs\cpcnv\sjis\sjisfromucs2.c"
+						>
+					</File>
+					<File
+						RelativePath=".\Libs\cpcnv\sjis\sjisstrlen.c"
+						>
+					</File>
+					<File
+						RelativePath=".\Libs\cpcnv\sjis\sjistoucs2.c"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="ucs2"
+					>
+					<File
+						RelativePath=".\Libs\cpcnv\ucs2\ucs2strlen.c"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="utf8"
+					>
+					<File
+						RelativePath=".\Libs\cpcnv\utf8\utf8fromucs2.c"
+						>
+					</File>
+					<File
+						RelativePath=".\Libs\cpcnv\utf8\utf8strlen.c"
+						>
+					</File>
+					<File
+						RelativePath=".\Libs\cpcnv\utf8\utf8toucs2.c"
+						>
+					</File>
+				</Filter>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Resource Files"
@@ -210,6 +294,10 @@
 			</File>
 			<File
 				RelativePath=".\net.h"
+				>
+			</File>
+			<File
+				RelativePath=".\render.h"
 				>
 			</File>
 			<File
