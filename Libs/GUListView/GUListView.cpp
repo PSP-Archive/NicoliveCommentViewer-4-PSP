@@ -5,6 +5,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define tostr(n) tostr_(n)
+#define tostr_(n) #n
+#define TRACE pspDebugScreenPrintf("TRACE: (%s:%s)\n", __FILE__, tostr(__LINE__));
+#define TRACEF {sprintf(trace_buf, "TRACE: (%s:%s)\r\n", __FILE__, tostr(__LINE__));fp=fopen("ms0:/debug.txt", "a");fputs(trace_buf, fp);fclose(fp);}
+
+
 void GUListObject::setValue(const char *newvalue)
 {
 	if(newvalue == NULL)
@@ -395,44 +401,43 @@ void GUListView::Render(SceCtrlData *padData, unsigned int *cursor)
 	cursor_max = this->columnlist[this->getLongestColumnId()].NValidItem()
 		- this->_disp_num;
 
-	if(!(padData == NULL && cursor == NULL))
+	// パッドの情報
+	// 条件に関係無く、毎回保存しておく
+	if(padData != NULL)
 	{
-		if(this->getColumn(this->getLongestColumnId())->list_filled)
+		currpad = *padData;
+	}
+
+//	if(this->getColumn(this->getLongestColumnId())->list_filled)
+//	{
+		if(cursor != NULL)
 		{
-			// パッドの情報
-			// 条件に関係無く、毎回保存しておく
-			//memset(&currpad, 0, sizeof(SceCtrlData));
-			if(padData != NULL)
+			// カーソル位置の指定があった場合は、
+			// それに従う
+
+			// 変更の必要無し
+			if(*cursor == _index)
 			{
-				currpad = *padData;
+				// index_changed = false;
 			}
-
-			if(cursor != NULL)
+			// いずれかのコラムが保持しているアイテムの数のうちの
+			// 最大を超えていた場合、
+			// 最後のアイテムへスクロール
+			if(*cursor >= cursor_max)
 			{
-				// カーソル位置の指定があった場合は、
-				// それに従う
-
-				// 変更の必要無し
-				//if(*cursor == _index)
-				//{
-				//	return;
-				//}
-				// いずれかのコラムが保持しているアイテムの数のうちの
-				// 最大を超えていた場合、
-				// 最後のアイテムへスクロール
-				if(*cursor >= cursor_max)
-				{
-					index_changed = true;
-					*cursor = cursor_max;
-					_index = cursor_max;
-				}
-				else
-				{
-					index_changed = true;
-					_index = *cursor;
-				}
+				index_changed = true;
+				//*cursor = cursor_max;
+				_index = cursor_max;
 			}
 			else
+			{
+				index_changed = true;
+				_index = *cursor;
+			}
+		}
+		else
+		{
+			if(padData != NULL)
 			{
 				// カーソル位置の指定が特に無かった場合は
 				// こっちで勝手に調整する
@@ -564,7 +569,6 @@ void GUListView::Render(SceCtrlData *padData, unsigned int *cursor)
 						}
 					}
 				}
-
 				// 結局、カーソル位置が変更されたかどうか
 				if(stick_scr == 0 && trigger_scr == 0 && pad_scr == 0)
 				{
@@ -598,19 +602,14 @@ void GUListView::Render(SceCtrlData *padData, unsigned int *cursor)
 							_index += move_scr;
 						}
 					}
-
 				}
 			}
+
 		}
-	}
-	else
-	{
-		// 両方NULL
-		index_changed = true;
-	}
+	//}
 
 	// 表示用GUTextBoxに反映
-	if(index_changed)
+	if(index_changed || (padData == NULL && cursor == NULL))
 	{
 		GUListItem *ptr;
 		for(p=0; p<_column_num; p++)
@@ -680,4 +679,3 @@ void GUListView::Draw(float x, float y)
 	}
 
 }
-
