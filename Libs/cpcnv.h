@@ -1,7 +1,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#include <libc/stdio.h>
+
+#include <pspkernel.h>
 
 #define DXP_CP_SJIS			(0x0d)
 #define DXP_CP_UTF8			(0xff)

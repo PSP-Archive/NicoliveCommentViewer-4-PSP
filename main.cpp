@@ -55,7 +55,7 @@ intraFont *arib;
 intraFont *chn;
 
 bool g_controllable = true;
-// GUMenu *menubar = new GUMenu;
+GUMenu *menubar;
 GUListView *lview;
 GUTextBox *GUT_stat;
 
@@ -163,23 +163,23 @@ int main(int argc, char *argv[])
 
 	pspDebugScreenPrintf("IntraFont loaded\n");
 	
-	/*
+	menubar = new GUMenu;
 	menubar->setColumn(0, "接続");
-	menubar->getColumn(0)->setItem(0, "ログイン", NULL);
+	menubar->getColumn(0)->setItem(0, "APに接続", NULL);
 	menubar->getColumn(0)->getItem(0)->setValid();
-	menubar->getColumn(0)->setItem(1, "番組に接続", NULL);
+	menubar->getColumn(0)->setItem(1, "ログイン", NULL);
 	menubar->getColumn(0)->getItem(1)->setValid();
+	menubar->getColumn(0)->setItem(2, "番組に接続", NULL);
+	menubar->getColumn(0)->getItem(2)->setValid();
 	menubar->getColumn(0)->setValid();
 
 	menubar->setColumn(1, "編集");
-	menubar->getColumn(1)->setItem(0, "ログをファイルに保存", NULL);
+	menubar->getColumn(1)->setItem(0, "ログを消去", NULL);
 	menubar->getColumn(1)->getItem(0)->setValid();
-	menubar->getColumn(1)->setItem(1, "ログを消去", NULL);
-	menubar->getColumn(1)->getItem(1)->setValid();
 	menubar->getColumn(1)->setValid();
 
-	menubar->setState(GUMenu::GUMENU_STATE_SHOW);
-*/
+	menubar->setState(GUMenu::GUMENU_STATE_HIDE);
+
 
 	lview = new GUListView(3, 100, 9);
 	lview->setColumn(0, "");

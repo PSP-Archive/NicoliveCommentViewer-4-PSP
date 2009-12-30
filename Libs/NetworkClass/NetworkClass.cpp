@@ -1,6 +1,7 @@
 #include <pspkernel.h>
 #include <unistd.h>
 #include <pspnet.h>
+#include <pspsdk.h>
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -367,9 +368,9 @@ int XMLSocket::recvEx(std::vector<std::string> *data)
 				}
 
 				one_comment = TempBuf;
-				// EnterCriticalSection(cs);
+				intc = pspSdkDisableInterrupts();
 				data->push_back(one_comment);
-				// LeaveCriticalSection(cs);
+				pspSdkEnableInterrupts(intc);				
 				free(TempBuf);
 				TempBuf = NULL;
 
@@ -396,9 +397,9 @@ int XMLSocket::recvEx(std::vector<std::string> *data)
 				}
 
 				one_comment = TempBuf;
-				// EnterCriticalSection(cs);
+				intc = pspSdkDisableInterrupts();
 				data->push_back(one_comment);
-				// LeaveCriticalSection(cs);
+				pspSdkEnableInterrupts(intc);
 				free(TempBuf);
 				TempBuf = NULL;
 
@@ -661,8 +662,6 @@ int HTTPSocket::recv(char *buftosave)
 	{
 		return 1;
 	}
-
-
 	int RecvLen = 0;
 	int LineBufLen = 4096;
 	int TotalBufLen = 0;
@@ -675,79 +674,35 @@ int HTTPSocket::recv(char *buftosave)
 		printf("No more memory...\n");
 		return 1;
 	}
-
-	memset(LineBuf, '\0', LineBufLen);
 	memset(TotalBuf, '\0', LineBufLen);
 
-
-	int i = 0;
 	while(1)
 	{
-		//for safety
-		if(i > 1000)
-		{
-			break;
-		}
-		else
-		{
-			i++;
-		}
-
 		memset(LineBuf, '\0', LineBufLen);
 		RecvLen = ::recv(sock, LineBuf, LineBufLen - 1, 0);
-		if(RecvLen == 0) break;
+		if(RecvLen <= 0) break;
 
-		
-		//since the separator of
-		//XMLSocket is NULL
-		char *found = strstr(LineBuf, "\0");
-		if(found != NULL)
+		*(LineBuf + RecvLen) = '\0';
+		TotalBufLen += RecvLen;
+		char *tmp = (char *)realloc(TotalBuf, TotalBufLen + 16);
+		if(tmp != NULL)
 		{
-			//found
-			TotalBufLen += RecvLen;
-			char *tmp = (char *)realloc(TotalBuf, TotalBufLen + 16);
-			if(tmp != NULL)
-			{
-				TotalBuf = tmp;
-			}
-			else
-			{
-				free(tmp);
-
-				free(LineBuf);
-				free(TotalBuf);
-				return 1;
-			}
-			strcat(TotalBuf, LineBuf);
-			break;
+			TotalBuf = tmp;
 		}
 		else
 		{
-			//not found;continue to recv
-			*(LineBuf + RecvLen) = '\0';
-			TotalBufLen += RecvLen;
-			char *tmp = (char *)realloc(TotalBuf, TotalBufLen + 16);
-			if(tmp != NULL)
-			{
-				TotalBuf = tmp;
-			}
-			else
-			{
-				free(tmp);
+			free(tmp);
 
-				free(LineBuf);
-				free(TotalBuf);
-				return 1;
-			}
-
-			strcat(TotalBuf, LineBuf);
+			free(LineBuf);
+			free(TotalBuf);
+			return 1;
 		}
-	}
 
+		strcat(TotalBuf, LineBuf);
+	}
 	strcpy(buftosave, TotalBuf);
 	free(LineBuf);
 	free(TotalBuf);
-
 
 	//default
 	return TotalBufLen;

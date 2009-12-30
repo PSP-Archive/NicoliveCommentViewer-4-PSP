@@ -1,33 +1,9 @@
 #ifndef _NICOAPIDECL
 #define _NICOAPIDECL
+#include "../types.h"
 
 #define FREE(_Memory) if(_Memory!=NULL){free(_Memory);_Memory=NULL;}
 
-typedef struct _UserData
-{
-	char *mail;
-	char *pass;
-
-	char *user_session;
-}UserData;
-
-typedef struct _LiveData
-{
-	int		id;
-	int		watch_count;
-	int		comment_count;
-	
-	int		start_time;
-	char	room_label[16]; 
-	int		room_seetno;
-
-	char	addr[64];
-	int		port;
-	int		thread;
-}LiveData;
-
-extern UserData userData;
-extern LiveData liveData;
 
 void NicoAPIStart(void);
 void NicoAPIEnd(void);

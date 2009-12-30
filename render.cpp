@@ -14,6 +14,7 @@
 int RenderThread(SceSize args, void *argp)
 {
 	char temp[128];
+	int ret = 0;
 	// 試験的にデータを追加してみるー
 	for(int q=1; q<80; q++)
 	{
@@ -36,9 +37,52 @@ int RenderThread(SceSize args, void *argp)
 	memset(&oldpad, 0, sizeof(SceCtrlData));
 	while(1)
 	{
-		lview->Render(&currpad, NULL);
+		ret = menubar->Render(&currpad);
+
+		if(ret != 0)
+		{
+			switch(ret)
+			{
+				case 0: // 「APに接続」
+					if(!thData.try_netconnect)
+					{
+						thData.try_netconnect = true;
+					}
+					break;
+
+				case 1: // 「ログイン」
+					if(!thData.try_login)
+					{
+						thData.try_login = true;
+					}
+					break;
+
+				case 2: // 「番組に接続」
+					if(!thData.try_liveconnect)
+					{
+						thData.try_liveconnect = true;
+					}
+					break;
+
+				case 10: // 「ログを消去」
+					for(int i=0; i<lview->_column_num; i++)
+					{
+						lview->getColumn(i)->flushItem();
+					}
+					lview->Render(NULL, (unsigned int *)0);
+					break;
 
 
+				default:
+					break;
+			}
+		}
+
+
+		if(menubar->getState() == GUMenu::GUMENU_STATE_HIDE)
+		{
+			lview->Render(&currpad, NULL);
+		}
 
 		oldpad = currpad;
 		sceKernelDelayThread(50 * 1000);
